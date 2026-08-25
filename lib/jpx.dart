@@ -1,3 +1,3 @@
 library jpeg2000;
 
-export 'src/jpx_image.dart';
+export 'src/jpx_image.dart' show JpxImage;
