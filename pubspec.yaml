@@ -1,0 +1,11 @@
+name: jpeg2000
+description: JPEG 2000 decoder written in Dart.
+version: 0.1.0
+repository: https://github.com/p3pp8/jpx
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+
+dev_dependencies:
+  test: ^1.25.0
