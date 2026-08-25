@@ -4,7 +4,8 @@ This module helps with decoding JPEG 2000 code stream. All in vanilla Dart with 
 
 ```dart
 import 'dart:typed_data';
-import 'package:jpeg2000/jpeg2000.dart';
+
+import 'jpeg2000/jpx.dart';
 
 void main() {
   final codestream = Uint8List.fromList([
@@ -22,6 +23,7 @@ void main() {
   print('tiles:');
   print(jpx.tiles);
 }
+
 ```
 \
 **NOTE**: This library has been successfully used to decompress the face image contained in the Italian Electronic Identity Card (CIE), which is compressed using JPEG 2000.
