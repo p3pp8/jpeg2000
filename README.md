@@ -1,6 +1,6 @@
 # jpeg2000
 
-This module helps with decoding JPEG 2000 code stream. All in vanilla Dart with no dependencies. Typings included.
+This plugin helps with decoding JPEG 2000 code stream. All in vanilla Dart with no dependencies. Typings included.
 
 ```dart
 import 'dart:typed_data';
@@ -29,4 +29,4 @@ void main() {
 **NOTE**: This library has been successfully used to decompress the face image contained in the Italian Electronic Identity Card (CIE), which is compressed using JPEG 2000.
 
 # Credits
-### This library is a direct port in pure Dart language of [runk/jpeg2000](https://github.com/runk/jpeg2000) library.
+### This plugin is a direct port in pure Dart language of [runk/jpeg2000](https://github.com/runk/jpeg2000) javascript module.
