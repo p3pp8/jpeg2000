@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "jpeg2000",
-      "version": "0.0.2+3",
+      "version": "0.0.3",
       "dependencies": [],
       "devDependencies": [
         "test"
