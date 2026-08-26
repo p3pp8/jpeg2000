@@ -1,6 +1,6 @@
-# 0.0.4
+# 0.1.0
 
-* Fix for publishing on pub.dev
+* Some code cleanup.
 
 # 0.0.3
 
@@ -12,4 +12,4 @@
 
 # 0.0.1
 
-* First commit
+* First commit.
