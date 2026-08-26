@@ -1,11 +1,15 @@
-## 0.0.3
+# 0.0.4
 
-- Add missing resources.
+* Fix for publishing on pub.dev
 
-## 0.0.2
+# 0.0.3
 
-- Project structure refactoring.
+* Add missing resources.
 
-## 0.0.1
+# 0.0.2
 
-- First commit
+* Project structure refactoring.
+
+# 0.0.1
+
+* First commit
