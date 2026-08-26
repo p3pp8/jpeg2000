@@ -1,5 +1,5 @@
 name: jpeg2000
-description: JPEG 2000 decoder written in Dart.
+description: JPEG 2000 decoder written in pure Dart. The code is based on runk/jpeg2000 javascript module. This library has been successfully used to decompress the face image contained in the Italian Electronic Identity Card (CIE).
 version: 0.0.4
 repository: https://github.com/p3pp8/jpeg2000
 
