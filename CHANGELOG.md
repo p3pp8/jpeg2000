@@ -1,6 +1,6 @@
 # 0.1.0
 
-* Some code cleanup.
+* Code cleanup.
 
 # 0.0.3
 
