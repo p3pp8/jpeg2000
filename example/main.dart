@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:jpeg2000/jpx.dart';
+import 'package:jpeg2000/jpeg2000.dart';
 
 void main() {
   final codestream = Uint8List.fromList([
