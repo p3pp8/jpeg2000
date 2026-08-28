@@ -210,6 +210,53 @@ This keeps the package:
 * dependency-free;
 * usable outside Flutter.
 
+### Converting RGBA pixels to a Flutter `ui.Image`
+
+`JpxImage` exposes decoded pixels as an RGBA `Uint8List`. In a Flutter application, these pixels can be converted directly to a `ui.Image` using Flutter's `decodeImageFromPixels`.
+
+```dart
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+Future<ui.Image> rgbaToUiImage(
+  Uint8List rgbaPixels,
+  int width,
+  int height,
+) {
+  final completer = Completer<ui.Image>();
+
+  ui.decodeImageFromPixels(
+    rgbaPixels,
+    width,
+    height,
+    ui.PixelFormat.rgba8888,
+    completer.complete,
+  );
+
+  return completer.future;
+}
+```
+
+For example, after decoding a JPEG 2000 image:
+
+```dart
+final image = JpxImage();
+image.parse(jpeg2000Data);
+
+final tile = image.tiles.first;
+
+final uiImage = await rgbaToUiImage(
+  tile.items,
+  tile.width,
+  tile.height,
+);
+```
+
+The resulting `ui.Image` can then be used with Flutter's `CustomPainter`, `RawImage`, or other APIs that accept a `ui.Image`.
+
+> **Note:** For images containing multiple JPEG 2000 tiles, the application must combine the tile buffers into a single RGBA image before converting them to a `ui.Image`.
+
 ## Italian Electronic Identity Card (CIE)
 
 JPEG 2000 is used by the Italian Electronic Identity Card (CIE) for the biometric face image.
