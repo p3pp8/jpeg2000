@@ -29,7 +29,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  jpeg2000: ^0.1.1
+  jpeg2000: ^0.1.3
 ```
 
 Then run:
