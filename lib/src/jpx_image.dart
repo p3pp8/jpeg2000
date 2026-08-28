@@ -1,10 +1,3 @@
-/// Decodes JPEG 2000 and JP2 images.
-///
-/// [JpxImage] accepts raw JPEG 2000 codestreams as well as JP2 containers.
-/// Decoded image data is exposed through [tiles] as RGBA pixel buffers.
-///
-/// The decoder is implemented entirely in Dart and has no runtime
-/// dependencies.
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -68,6 +61,7 @@ int _clamp8(num value) {
 /// Decodes JPEG 2000 and JP2 images.
 ///
 /// [JpxImage] accepts raw JPEG 2000 codestreams as well as JP2 containers.
+///
 /// Decoded image data is exposed through [tiles] as RGBA pixel buffers.
 ///
 /// The decoder is implemented entirely in Dart and has no runtime
