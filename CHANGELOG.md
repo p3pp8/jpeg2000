@@ -2,6 +2,10 @@
 
 All notable changes to this package are documented in this file.
 
+## 0.1.4
+
+* Added a Flutter example showing how to convert decoded RGBA pixels into a ui.Image.
+
 ## 0.1.3
 
 * Improved public API documentation.

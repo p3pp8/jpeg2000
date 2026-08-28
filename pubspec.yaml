@@ -1,6 +1,6 @@
 name: jpeg2000
 description: JPEG 2000 decoder written in pure Dart with no runtime dependencies. The code is a port of runk/jpeg2000 javascript module.
-version: 0.1.3
+version: 0.1.4
 
 repository: https://github.com/p3pp8/jpeg2000
 homepage: https://github.com/p3pp8/jpeg2000
