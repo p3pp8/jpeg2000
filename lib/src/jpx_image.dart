@@ -1,10 +1,10 @@
-/* Copyright 2012 Mozilla Foundation
- * Licensed under the Apache License, Version 2.0.
- *
- * Direct Dart port of https://github.com/runk/jpeg2000/blob/main/src/jpx.js
- * The algorithms, marker handling and packet progression logic intentionally
- * follow the JavaScript source as closely as Dart permits.
- */
+/// Decodes JPEG 2000 and JP2 images.
+///
+/// [JpxImage] accepts raw JPEG 2000 codestreams as well as JP2 containers.
+/// Decoded image data is exposed through [tiles] as RGBA pixel buffers.
+///
+/// The decoder is implemented entirely in Dart and has no runtime
+/// dependencies.
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -65,14 +65,39 @@ int _clamp8(num value) {
   return n;
 }
 
+/// Decodes JPEG 2000 and JP2 images.
+///
+/// [JpxImage] accepts raw JPEG 2000 codestreams as well as JP2 containers.
+/// Decoded image data is exposed through [tiles] as RGBA pixel buffers.
+///
+/// The decoder is implemented entirely in Dart and has no runtime
+/// dependencies.
 class JpxImage {
+  /// Creates a JPEG 2000 image decoder.
   JpxImage();
 
+  /// Whether decoding should fail immediately when corrupted image data
+  /// is detected.
+  ///
+  /// When `false`, the decoder attempts to recover from supported
+  /// forms of corrupted input.
   bool failOnCorruptedImage = false;
+
+  /// Width of the decoded image in pixels.
   int width = 0;
+
+  /// Height of the decoded image in pixels.
   int height = 0;
+
+  /// Number of components in the decoded image.
   int componentsCount = 0;
+
+  /// Number of bits used by each image component.
   int bitsPerComponent = 8;
+
+  /// Decoded image tiles.
+  ///
+  /// Each tile contains RGBA pixel data in its [JpxTile.items] buffer.
   List<JpxTile> tiles = <JpxTile>[];
 
   static const Map<String, int> _subbandsGainLog2 = <String, int>{
@@ -82,6 +107,16 @@ class JpxImage {
     'HH': 2,
   };
 
+  /// Parses and decodes JPEG 2000 or JP2 image data.
+  ///
+  /// [data] may contain either a raw JPEG 2000 codestream or a complete
+  /// JP2 container.
+  ///
+  /// On successful decoding, [width], [height], [componentsCount], and
+  /// [tiles] contain information about the decoded image.
+  ///
+  /// Throws [JpxError] when the input is invalid or contains an
+  /// unsupported JPEG 2000 feature.
   void parse(Uint8List data) {
     if (data.length < 2) {
       throw JpxError('Invalid data');
@@ -106,8 +141,7 @@ class JpxImage {
         if (position + 8 > length) {
           throw JpxError('Invalid box field size');
         }
-        lbox =
-            readUint32(data, position) * 4294967296 +
+        lbox = readUint32(data, position) * 4294967296 +
             readUint32(data, position + 4);
         position += 8;
         headerSize += 8;
@@ -169,6 +203,14 @@ class JpxImage {
     }
   }
 
+  /// Reads basic image properties from a JPEG 2000 byte stream.
+  ///
+  /// Unlike [parse], this method does not decode the image pixels.
+  /// It reads the JPEG 2000 size information and updates [width],
+  /// [height], [componentsCount], and [bitsPerComponent].
+  ///
+  /// Throws [JpxError] when the stream does not contain a JPEG 2000
+  /// size marker.
   void parseImageProperties(JpxByteStream stream) {
     var newByte = stream.getByte();
     while (newByte >= 0) {
@@ -193,6 +235,16 @@ class JpxImage {
     throw JpxError('No size marker found in JPX stream');
   }
 
+  /// Parses a JPEG 2000 codestream contained in [data].
+  ///
+  /// The codestream is read from [start] up to [end].
+  ///
+  /// This method is normally invoked internally by [parse] when the
+  /// input contains either a raw JPEG 2000 codestream or the `jp2c`
+  /// box of a JP2 container.
+  ///
+  /// Throws [JpxError] when the codestream is invalid or contains
+  /// unsupported JPEG 2000 features.
   void parseCodestream(Uint8List data, int start, int end) {
     final context = <String, dynamic>{};
     var doNotRecover = false;
@@ -466,10 +518,10 @@ class JpxImage {
   ) {
     final siz = _m(context['SIZ']);
     final tiles = <dynamic>[];
-    final numXtiles = ((_i(siz['Xsiz']) - _i(siz['XTOsiz'])) / _i(siz['XTsiz']))
-        .ceil();
-    final numYtiles = ((_i(siz['Ysiz']) - _i(siz['YTOsiz'])) / _i(siz['YTsiz']))
-        .ceil();
+    final numXtiles =
+        ((_i(siz['Xsiz']) - _i(siz['XTOsiz'])) / _i(siz['XTsiz'])).ceil();
+    final numYtiles =
+        ((_i(siz['Ysiz']) - _i(siz['YTOsiz'])) / _i(siz['YTsiz'])).ceil();
     for (var q = 0; q < numYtiles; q++) {
       for (var p = 0; p < numXtiles; p++) {
         final tile = <String, dynamic>{
@@ -551,11 +603,11 @@ class JpxImage {
         1 << (_i(dimensions['PPy']) + (isZeroRes ? 0 : -1));
     final numprecinctswide = _i(resolution['trx1']) > _i(resolution['trx0'])
         ? (_i(resolution['trx1']) / precinctWidth).ceil() -
-              (_i(resolution['trx0']) / precinctWidth).floor()
+            (_i(resolution['trx0']) / precinctWidth).floor()
         : 0;
     final numprecinctshigh = _i(resolution['try1']) > _i(resolution['try0'])
         ? (_i(resolution['try1']) / precinctHeight).ceil() -
-              (_i(resolution['try0']) / precinctHeight).floor()
+            (_i(resolution['try0']) / precinctHeight).floor()
         : 0;
     resolution['precinctParameters'] = <String, dynamic>{
       'precinctWidth': precinctWidth,
@@ -613,14 +665,12 @@ class JpxImage {
           _i(subband['tby1']),
           _i(codeblock['tby1']),
         );
-        final pi =
-            ((_i(codeblock['tbx0_']) - _i(subband['tbx0'])) /
-                    _i(precinctParameters['precinctWidthInSubband']))
-                .floor();
-        final pj =
-            ((_i(codeblock['tby0_']) - _i(subband['tby0'])) /
-                    _i(precinctParameters['precinctHeightInSubband']))
-                .floor();
+        final pi = ((_i(codeblock['tbx0_']) - _i(subband['tbx0'])) /
+                _i(precinctParameters['precinctWidthInSubband']))
+            .floor();
+        final pj = ((_i(codeblock['tby0_']) - _i(subband['tby0'])) /
+                _i(precinctParameters['precinctHeightInSubband']))
+            .floor();
         final precinctNumber =
             pi + pj * _i(precinctParameters['numprecinctswide']);
         codeblock['precinctNumber'] = precinctNumber;
@@ -911,8 +961,7 @@ class JpxImage {
           codeblock['Lblock'] = _i(codeblock['Lblock']) + 1;
         }
         final codingpassesLog2 = log2Ceil(codingpasses);
-        final bits =
-            (codingpasses < (1 << codingpassesLog2)
+        final bits = (codingpasses < (1 << codingpassesLog2)
                 ? codingpassesLog2 - 1
                 : codingpassesLog2) +
             _i(codeblock['Lblock']);
@@ -1071,9 +1120,8 @@ class JpxImage {
     final precision = _i(_m(_l(context['components'])[c])['precision']);
     final reversible =
         _i(codingStyleParameters['reversibleTransformation']) != 0;
-    final transform = reversible
-        ? _ReversibleTransform()
-        : _IrreversibleTransform();
+    final transform =
+        reversible ? _ReversibleTransform() : _IrreversibleTransform();
 
     final subbandCoefficients = <Map<String, dynamic>>[];
     var b = 0;
@@ -1099,7 +1147,7 @@ class JpxImage {
         final delta = reversible
             ? 1.0
             : math.pow(2, precision + gainLog2 - epsilon).toDouble() *
-                  (1 + mu / 2048);
+                (1 + mu / 2048);
         final mb = guardBits + epsilon - 1;
         _copyCoefficients(
           coefficients,
@@ -1242,21 +1290,18 @@ class JpxImage {
         final shift0 = _i(_m(components[0])['precision']) - 8;
         final offset0 = _scaled128(shift0) + 0.5;
 
-        final shift1 = componentsCount >= 2
-            ? _i(_m(components[1])['precision']) - 8
-            : 0;
+        final shift1 =
+            componentsCount >= 2 ? _i(_m(components[1])['precision']) - 8 : 0;
 
         final offset1 = componentsCount >= 2 ? _scaled128(shift1) + 0.5 : 0.0;
 
-        final shift2 = componentsCount >= 3
-            ? _i(_m(components[2])['precision']) - 8
-            : 0;
+        final shift2 =
+            componentsCount >= 3 ? _i(_m(components[2])['precision']) - 8 : 0;
 
         final offset2 = componentsCount >= 3 ? _scaled128(shift2) + 0.5 : 0.0;
 
-        final shift3 = componentsCount >= 4
-            ? _i(_m(components[3])['precision']) - 8
-            : 0;
+        final shift3 =
+            componentsCount >= 4 ? _i(_m(components[3])['precision']) - 8 : 0;
 
         final offset3 = componentsCount >= 4 ? _scaled128(shift3) + 0.5 : 0.0;
 
@@ -1299,14 +1344,12 @@ class JpxImage {
     for (var c = 0; c < componentsCount; c++) {
       final component = _m(_l(tile['components'])[c]);
       final qcc = _l(currentTile['QCC']);
-      final qcdOrQcc = c < qcc.length && qcc[c] != null
-          ? qcc[c]
-          : currentTile['QCD'];
+      final qcdOrQcc =
+          c < qcc.length && qcc[c] != null ? qcc[c] : currentTile['QCD'];
       component['quantizationParameters'] = qcdOrQcc;
       final coc = _l(currentTile['COC']);
-      final codOrCoc = c < coc.length && coc[c] != null
-          ? coc[c]
-          : currentTile['COD'];
+      final codOrCoc =
+          c < coc.length && coc[c] != null ? coc[c] : currentTile['COD'];
       component['codingStyleParameters'] = codOrCoc;
     }
     tile['codingStyleDefaultParameters'] = currentTile['COD'];
@@ -1348,8 +1391,9 @@ abstract class _PacketIterator {
 
 class _LrcpIterator implements _PacketIterator {
   _LrcpIterator(Map<String, dynamic> context)
-    : tile = _m(_l(context['tiles'])[_i(_m(context['currentTile'])['index'])]),
-      componentsCount = _i(_m(context['SIZ'])['Csiz']) {
+      : tile =
+            _m(_l(context['tiles'])[_i(_m(context['currentTile'])['index'])]),
+        componentsCount = _i(_m(context['SIZ'])['Csiz']) {
     layersCount = _i(_m(tile['codingStyleDefaultParameters'])['layersCount']);
     for (var q = 0; q < componentsCount; q++) {
       maxDecompositionLevelsCount = math.max(
@@ -1402,8 +1446,9 @@ class _LrcpIterator implements _PacketIterator {
 
 class _RlcpIterator implements _PacketIterator {
   _RlcpIterator(Map<String, dynamic> context)
-    : tile = _m(_l(context['tiles'])[_i(_m(context['currentTile'])['index'])]),
-      componentsCount = _i(_m(context['SIZ'])['Csiz']) {
+      : tile =
+            _m(_l(context['tiles'])[_i(_m(context['currentTile'])['index'])]),
+        componentsCount = _i(_m(context['SIZ'])['Csiz']) {
     layersCount = _i(_m(tile['codingStyleDefaultParameters'])['layersCount']);
     for (var q = 0; q < componentsCount; q++) {
       maxDecompositionLevelsCount = math.max(
@@ -1456,8 +1501,9 @@ class _RlcpIterator implements _PacketIterator {
 
 class _RpclIterator implements _PacketIterator {
   _RpclIterator(Map<String, dynamic> context)
-    : tile = _m(_l(context['tiles'])[_i(_m(context['currentTile'])['index'])]),
-      componentsCount = _i(_m(context['SIZ'])['Csiz']) {
+      : tile =
+            _m(_l(context['tiles'])[_i(_m(context['currentTile'])['index'])]),
+        componentsCount = _i(_m(context['SIZ'])['Csiz']) {
     layersCount = _i(_m(tile['codingStyleDefaultParameters'])['layersCount']);
     for (var c = 0; c < componentsCount; c++) {
       maxDecompositionLevelsCount = math.max(
@@ -1538,8 +1584,7 @@ int? _getPrecinctIndexIfExist(
     return null;
   }
   // Intentionally matches the JavaScript source exactly.
-  final startPrecinctRowIndex =
-      (posY / _i(sizeInImageScale['width'])) *
+  final startPrecinctRowIndex = (posY / _i(sizeInImageScale['width'])) *
       _i(_m(resolution['precinctParameters'])['numprecinctswide']);
   return (posX / _i(sizeInImageScale['height']) + startPrecinctRowIndex)
       .truncate();
@@ -1617,8 +1662,9 @@ Map<String, dynamic> _getPrecinctSizesInImageScale(Map<String, dynamic> tile) {
 
 class _PcrlIterator implements _PacketIterator {
   _PcrlIterator(Map<String, dynamic> context)
-    : tile = _m(_l(context['tiles'])[_i(_m(context['currentTile'])['index'])]),
-      componentsCount = _i(_m(context['SIZ'])['Csiz']) {
+      : tile =
+            _m(_l(context['tiles'])[_i(_m(context['currentTile'])['index'])]),
+        componentsCount = _i(_m(context['SIZ'])['Csiz']) {
     layersCount = _i(_m(tile['codingStyleDefaultParameters'])['layersCount']);
     precinctsSizes = _getPrecinctSizesInImageScale(tile);
   }
@@ -1666,8 +1712,9 @@ class _PcrlIterator implements _PacketIterator {
 
 class _CprlIterator implements _PacketIterator {
   _CprlIterator(Map<String, dynamic> context)
-    : tile = _m(_l(context['tiles'])[_i(_m(context['currentTile'])['index'])]),
-      componentsCount = _i(_m(context['SIZ'])['Csiz']) {
+      : tile =
+            _m(_l(context['tiles'])[_i(_m(context['currentTile'])['index'])]),
+        componentsCount = _i(_m(context['SIZ'])['Csiz']) {
     layersCount = _i(_m(tile['codingStyleDefaultParameters'])['layersCount']);
     precinctsSizes = _getPrecinctSizesInImageScale(tile);
   }
@@ -1773,8 +1820,8 @@ class _TagTree {
 
 class _TreeLevel {
   _TreeLevel(this.width, this.height, {required bool sparse})
-    : sparseItems = sparse ? <int, int>{} : null,
-      denseItems = sparse ? null : Uint8List(width * height);
+      : sparseItems = sparse ? <int, int>{} : null,
+        denseItems = sparse ? null : Uint8List(width * height);
 
   final int width;
   final int height;
@@ -1865,20 +1912,20 @@ class _InclusionTree {
 
 class _BitModel {
   _BitModel(this.width, this.height, String subband, int zeroBitPlanes, int mb)
-    : contextLabelTable = subband == 'HH'
-          ? _hhContextLabel
-          : subband == 'HL'
-          ? _hlContextLabel
-          : _llAndLhContextLabel,
-      neighborsSignificance = Uint8List(width * height),
-      coefficentsSign = Uint8List(width * height),
-      coefficentsMagnitude = mb > 14
-          ? Uint32List(width * height)
-          : mb > 6
-          ? Uint16List(width * height)
-          : Uint8List(width * height),
-      processingFlags = Uint8List(width * height),
-      bitsDecoded = Uint8List(width * height) {
+      : contextLabelTable = subband == 'HH'
+            ? _hhContextLabel
+            : subband == 'HL'
+                ? _hlContextLabel
+                : _llAndLhContextLabel,
+        neighborsSignificance = Uint8List(width * height),
+        coefficentsSign = Uint8List(width * height),
+        coefficentsMagnitude = mb > 14
+            ? Uint32List(width * height)
+            : mb > 6
+                ? Uint16List(width * height)
+                : Uint8List(width * height),
+        processingFlags = Uint8List(width * height),
+        bitsDecoded = Uint8List(width * height) {
     if (zeroBitPlanes != 0) {
       bitsDecoded.fillRange(0, bitsDecoded.length, zeroBitPlanes);
     }
@@ -2273,8 +2320,7 @@ class _BitModel {
       final checkAllEmpty = i0 + 3 < height;
       for (var j = 0; j < width; j++) {
         final index0 = indexBase + j;
-        final allEmpty =
-            checkAllEmpty &&
+        final allEmpty = checkAllEmpty &&
             processingFlags[index0] == 0 &&
             processingFlags[index0 + oneRowDown] == 0 &&
             processingFlags[index0 + twoRowsDown] == 0 &&
@@ -2299,8 +2345,7 @@ class _BitModel {
             bitsDecoded[index0 + threeRowsDown]++;
             continue;
           }
-          i1 =
-              (decoder.readBit(contexts, uniformContext) << 1) |
+          i1 = (decoder.readBit(contexts, uniformContext) << 1) |
               decoder.readBit(contexts, uniformContext);
           if (i1 != 0) {
             i = i0 + i1;
@@ -2339,8 +2384,7 @@ class _BitModel {
   }
 
   void checkSegmentationSymbol() {
-    final symbol =
-        (decoder.readBit(contexts, uniformContext) << 3) |
+    final symbol = (decoder.readBit(contexts, uniformContext) << 3) |
         (decoder.readBit(contexts, uniformContext) << 2) |
         (decoder.readBit(contexts, uniformContext) << 1) |
         decoder.readBit(contexts, uniformContext);
