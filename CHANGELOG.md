@@ -2,6 +2,13 @@
 
 All notable changes to this package are documented in this file.
 
+## 0.1.2
+
+* Added DartDoc documentation for the public API.
+* Improved package documentation and usage examples.
+* Improved API documentation for JpxImage.
+* Improved package metadata and pub.dev documentation.
+
 ## 0.1.1
 
 * Added JPEG 2000 codestream decoding in pure Dart.
