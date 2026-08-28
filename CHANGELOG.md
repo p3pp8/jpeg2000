@@ -2,25 +2,29 @@
 
 All notable changes to this package are documented in this file.
 
+## 0.1.3
+
+* Improved public API documentation.
+* Fixed library and class-level DartDoc placement.
+* Removed dangling library documentation comments from internal source files.
+* Improved compatibility with pub.dev static analysis.
+
 ## 0.1.2
 
-* Added DartDoc documentation for the public API.
-* Improved package documentation and usage examples.
-* Improved API documentation for JpxImage.
-* Improved package metadata and pub.dev documentation.
+* Fixed a dangling library documentation comment.
+* Improved public API documentation.
 
 ## 0.1.1
 
-* Added JPEG 2000 codestream decoding in pure Dart.
-* Added support for JPEG 2000 data embedded in JP2 containers.
+* Added pure Dart JPEG 2000 and JP2 decoding.
+* Added support for raw JPEG 2000 codestreams.
+* Added support for JPEG 2000 codestreams contained in JP2 containers.
 * Added decoding of image data to RGBA `Uint8List` buffers.
-* Added support for tiled JPEG 2000 images through `JpxTile`.
-* Added image dimensions and component information to `JpxImage`.
-* Added stream-based image property parsing through `JpxByteStream`.
-* Added `JpxError` for invalid and unsupported JPEG 2000 data.
-* Improved JPEG 2000 marker, packet, quantization, and component handling.
+* Added support for tiled JPEG 2000 images.
+* Added image dimension and component information.
+* Added image property parsing without decoding the complete image.
 * Added support for reversible and irreversible component transforms.
-* Updated the public package API and examples.
+* Improved JPEG 2000 marker, packet, quantization, and component handling.
 
 ## 0.1.0
 
